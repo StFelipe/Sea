@@ -5,6 +5,7 @@ CC=gcc
 # REMOVE -g FLAG FOR DEBUGGING WHEN BUILDING A RELEASE
 CFLAGS=-IC:/mingw_link/mingw_include -Iengine
 CFLAGS+=-g
+CFLAGS+=-MMD
 #CFLAGS+=-MMD
 
 LDLIBS=-LC:/mingw_link/mingw_lib -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf

@@ -6,6 +6,9 @@
 
 #include "engine.h"
 #include "game/Player.h"
+#include "game/Game.h"
+#include "game/Editor.h"
+#include "game/MainMenu.h"
 
 const int SCREEN_WIDTH = 1280;
 const int SCREEN_HEIGHT = 720;
@@ -16,17 +19,21 @@ int main(int argc, char* args[])
     if (!InitEngine("GAME", SCREEN_WIDTH, SCREEN_HEIGHT, 4, &engine))
         return false;
 
-    Player player;
-    PlayerInit(&player, &engine);
+    Game game;
+    InitGame(&game, &engine);
 
-    SDL_Texture* background = LoadTexture("assets/background.png", engine.renderer);
-    SDL_QueryTexture(background, NULL, NULL, &engine.levelWidth, &engine.levelHeight);
+    MainMenu mainMenu;
+    InitMainMenu(&mainMenu, &engine);
+
+    Editor editor;
+    InitEditor(&editor, &engine);
 
     SDL_Rect srcRect;
     SDL_Rect destRect;
     bool quit = false;
-    char fps[10];
     SDL_Event e;
+    State state = MainMenuState;
+
     while (!quit)
     {
         EngineUpdate(&engine);
@@ -34,36 +41,18 @@ int main(int argc, char* args[])
         while (SDL_PollEvent(&e))
         {
             if (e.type == SDL_QUIT)
-            {
                 quit = true;
-            }
 
-            EngineHandleEvent(&engine, &e);
+            GameHandleEvent(&game, &engine, &e);
         }
         const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
-        PlayerHandleInput(&player, &engine, currentKeyStates);
-        PlayerUpdate(&player, &engine);
-
-        EngineUpdateCamera(&engine, player.pos.x, player.pos.y, player.anim.w, player.anim.h);
-
-        SDL_RenderClear(engine.renderer);
-
-        EngineGetScreenRect(&engine, &destRect, 0, 0, engine.levelWidth, engine.levelHeight);
-        SDL_RenderCopy(engine.renderer, background, NULL, &destRect);
-
-        EngineGetScreenRect(&engine, &destRect, player.pos.x, player.pos.y, player.anim.w, player.anim.h);
-        SetAnimRect(&player.anim, &srcRect);
-        SDL_RenderCopy(engine.renderer, player.tex, &srcRect, &destRect);
-
-        itoa(engine.fps, fps, 10);
-        RenderText(&engine, fps, (SDL_Color){ 0, 0, 0, 255 }, 0, 0);
-
-        SDL_RenderPresent(engine.renderer);
+        UpdateGame(&game, &engine, currentKeyStates);
     }
-    SDL_DestroyTexture(background);
-    background = NULL;
     
-    PlayerFree(&player);
+    FreeGame(&game);
+    FreeMainMenu(&mainMenu);
+    FreeEditor(&editor);
+    
     CloseEngine(&engine);
     return 0;
 }

@@ -6,7 +6,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 
-#define PLAYER_SPEED 50
+#define PLAYER_SPEED 100
 
 typedef struct Player {
     SDL_Texture* tex;

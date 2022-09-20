@@ -15,7 +15,9 @@
         "new": "c",
         "*.tcc": "c",
         "type_traits": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "player.h": "c",
+        "mainmenu.h": "c"
     },
     "makefile.launchConfigurations": [
         {

@@ -9,10 +9,18 @@
 
 #define FPSES_COUNT 100
 
+typedef enum State {
+    MainMenuState,
+    GameState,
+    EditorState
+} State;
+
 typedef struct Engine
 {
     SDL_Window* window;
     SDL_Renderer* renderer;
+
+    State state;
 
     TTF_Font* font;
     SDL_Rect textRect;
