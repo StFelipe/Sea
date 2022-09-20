@@ -22,6 +22,6 @@ void InitGame(Game* game, Engine* engine);
 void FreeGame(Game* game);
 
 void GameHandleEvent(Game* game, Engine* engine, SDL_Event* e);
-void UpdateGame(Game* game, Engine* engine, State* state);
+void UpdateGame(Game* game, Engine* engine);
 
 #endif

@@ -32,7 +32,7 @@ int main(int argc, char* args[])
     SDL_Rect destRect;
     bool quit = false;
     SDL_Event e;
-    State state = MainMenuState;
+    engine.state = MainMenuState;
 
     while (!quit)
     {
@@ -45,22 +45,22 @@ int main(int argc, char* args[])
 
             EngineHandleEvent(&engine, &e);
 
-            if (state == MainMenuState)
+            if (engine.state == MainMenuState)
                 MainMenuHandleEvent(&mainMenu, &engine, &e);
-            else if (state == GameState)
+            else if (engine.state == GameState)
                 GameHandleEvent(&game, &engine, &e);
-            else if (state == EditorState)
+            else if (engine.state == EditorState)
                 EditorHandleEvent(&editor, &engine, &e);
         }
 
         EngineUpdateInput(&engine);
 
-        if (state == MainMenuState)
-            quit |= UpdateMainMenu(&mainMenu, &engine, &state);
-        else if (state == GameState)
-            UpdateGame(&game, &engine, &state);
-        else if (state == EditorState)
-            UpdateEditor(&editor, &engine, &state);
+        if (engine.state == MainMenuState)
+            quit |= UpdateMainMenu(&mainMenu, &engine);
+        else if (engine.state == GameState)
+            UpdateGame(&game, &engine);
+        else if (engine.state == EditorState)
+            UpdateEditor(&editor, &engine);
     }
     
     FreeGame(&game);

@@ -24,7 +24,11 @@ void GameHandleEvent(Game* game, Engine* engine, SDL_Event* e)
         if (e->window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
             SetCameraScale(&game->camera, engine, game->level.w, game->level.h);
     }
-    else if (e->type == SDL_MOUSEWHEEL)
+
+    if (engine->isPaused)
+        return;
+
+    if (e->type == SDL_MOUSEWHEEL)
     {
         if(e->wheel.y > 0)
             CameraZoomIn(&game->camera, engine, game->level.w, game->level.h);
@@ -33,14 +37,20 @@ void GameHandleEvent(Game* game, Engine* engine, SDL_Event* e)
     }
 }
 
-void UpdateGame(Game* game, Engine* engine, State* state)
+void UpdateGame(Game* game, Engine* engine)
 {
+    if (IsKeyPresed(engine->input, SDL_SCANCODE_ESCAPE))
+        engine->isPaused = !engine->isPaused;
+
     Player* player = &game->player;
 
-    PlayerHandleInput(player, engine, &game->level);
-    PlayerUpdate(player, engine);
+    if (!engine->isPaused)
+    {
+        PlayerHandleInput(player, engine, &game->level);
+        PlayerUpdate(player, engine);
 
-    UpdateCamera(&game->camera, player->pos.x, player->pos.y, player->anim.w, player->anim.h, game->level.w, game->level.h);
+        UpdateCamera(&game->camera, player->pos.x, player->pos.y, player->anim.w, player->anim.h, game->level.w, game->level.h);
+    }
 
     SDL_RenderClear(engine->renderer);
 
@@ -53,6 +63,21 @@ void UpdateGame(Game* game, Engine* engine, State* state)
 
     itoa(engine->fps, game->fps, 10);
     RenderText(engine, game->fps, (SDL_Color){ 0, 0, 0, 255 }, 0, 0);
+
+    if (engine->isPaused)
+    {
+        game->destRect.x = 0;
+        game->destRect.y = 0;
+        game->destRect.w = engine->windowWidth;
+        game->destRect.h = engine->windowHeight;
+        
+        SDL_SetRenderDrawBlendMode(engine->renderer, SDL_BLENDMODE_BLEND);
+        SDL_SetRenderDrawColor(engine->renderer, 0, 0, 0, 150);
+        SDL_RenderFillRect(engine->renderer, &game->destRect);
+        SDL_SetRenderDrawBlendMode(engine->renderer, SDL_BLENDMODE_NONE);
+
+        RenderText(engine, "Testing", (SDL_Color){ 255, 255, 100, 255}, 250, 250);
+    }
 
     SDL_RenderPresent(engine->renderer);
 }

@@ -15,7 +15,7 @@ void EditorHandleEvent(Editor* editor, Engine* engine, SDL_Event* e)
 
 }
 
-void UpdateEditor(Editor* editor, Engine* engine, State* state)
+void UpdateEditor(Editor* editor, Engine* engine)
 {
     
 }

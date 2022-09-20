@@ -20,6 +20,6 @@ void InitMainMenu(MainMenu* mainMenu, Engine* engine);
 void FreeMainMenu(MainMenu* mainMenu);
 
 void MainMenuHandleEvent(MainMenu* mainMenu, Engine* engine, SDL_Event* e);
-bool UpdateMainMenu(MainMenu* mainMenu, Engine* engine, State* state);
+bool UpdateMainMenu(MainMenu* mainMenu, Engine* engine);
 
 #endif

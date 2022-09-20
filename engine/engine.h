@@ -28,6 +28,7 @@ typedef struct Engine
     SDL_Renderer* renderer;
 
     State state;
+    bool isPaused;
 
     TTF_Font* font;
     SDL_Rect textRect;

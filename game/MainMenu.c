@@ -27,14 +27,14 @@ void RenderTextInMiddle(Engine* engine, const char* text, SDL_Color color, int y
 
     RenderTextFromTexture(engine, textTexture, &textRect);
 }
-bool UpdateMainMenu(MainMenu* mainMenu, Engine* engine, State* state)
+bool UpdateMainMenu(MainMenu* mainMenu, Engine* engine)
 {
     if (IsKeyPresed(engine->input, SDL_SCANCODE_RETURN))
     {
         if (mainMenu->selection == MainMenuPlay)
-            *state = GameState;
+            engine->state = GameState;
         if (mainMenu->selection == MainMenuEditor)
-            *state = EditorState;
+            engine->state = EditorState;
         if (mainMenu->selection == MainMenuQuit)
             return true;
     }

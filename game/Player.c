@@ -89,9 +89,10 @@ void PlayerUpdate(Player* player, Engine* engine)
     Anim* anim = &player->anim;
     if (anim->isAnimating)
     {
-        if (engine->time - anim->timer >= anim->speed)
+        anim->timer += engine->deltaTime;
+        if (anim->timer >= anim->speed)
         {
-            anim->timer = engine->time;
+            anim->timer = 0;
             anim->frame = (anim->frame + 1) % anim->frames;
         }
     }

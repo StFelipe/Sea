@@ -29,6 +29,8 @@ int InitEngine(const char* windowName, int windowWidth, int windowHeight, Engine
     engine->fps = 0;
     engine->fpsIndex = 0;
 
+    engine->isPaused = false;
+
     for (int i = 0; i < SDL_NUM_SCANCODES; i++)
         engine->input[i] = KeyStateNone;
 
@@ -127,6 +129,9 @@ void EngineUpdate(Engine* engine)
     for (int i = 0; i < FPSES_COUNT; i++)
         engine->fps += engine->fpses[i];
     engine->fps /= FPSES_COUNT;
+
+    if (engine->isPaused)
+        engine->deltaTime = 0;
 }
 
 SDL_Texture* GetTextTexture(Engine* engine, const char* text, SDL_Color color, int x, int y, SDL_Rect* textureRect)
