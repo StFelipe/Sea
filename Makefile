@@ -6,7 +6,6 @@ CC=gcc
 CFLAGS=-IC:/mingw_link/mingw_include -Iengine
 CFLAGS+=-g
 CFLAGS+=-MMD
-#CFLAGS+=-MMD
 
 LDLIBS=-LC:/mingw_link/mingw_lib -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf
 
@@ -16,7 +15,7 @@ LDFLAGS=$(LDFLAGS_debug)
 
 SRCS=$(wildcard *.c) $(wildcard */*.c) $(wildcard */*/*.c) $(wildcard */*/*/*.c)
 OBJS=$(SRCS:.c=.o)
-#DEPS=$(OBJS:.o=.d)
+DEPS=$(OBJS:.o=.d)
 
 .PHONY: all clean
 all: $(name)
@@ -24,7 +23,7 @@ all: $(name)
 $(name): $(OBJS)
 	$(CC) -o $(name) $(OBJS) $(LDLIBS) $(LDFLAGS)
 
-#-include $(DEPS)
+-include $(DEPS)
 
 #rm -f $(name)
 #rm -f $(DEPS) $(OBJS)
@@ -32,4 +31,5 @@ $(name): $(OBJS)
 #Del $(name)
 clean:
 	del /S *.o
+	del /S *.d
 	del $(win_name)

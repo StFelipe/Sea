@@ -4,9 +4,6 @@
 #include <SDL_image.h>
 #include <stdbool.h>
 
-
-void SetScale(Engine* engine);
-
 void InitManagers(Engine* engine)
 {
     engine->window = NULL;
@@ -22,19 +19,18 @@ void FreeManagers(Engine* engine)
     engine->window = NULL;
 }
 
-int InitEngine(const char* windowName, int windowWidth, int windowHeight, int startingZoom, Engine* engine)
+int InitEngine(const char* windowName, int windowWidth, int windowHeight, Engine* engine)
 {
     engine->windowWidth = windowWidth;
     engine->windowHeight = windowHeight;
-
-    engine->renderStartPoint = (SDL_Point){ 0, 0 };
-    engine->camera = (SDL_FRect){ 0, 0, windowWidth / startingZoom, windowHeight / startingZoom };
-    engine->zoom = startingZoom;
 
     engine->lastTicks = 0;
     engine->deltaTime = 0;
     engine->fps = 0;
     engine->fpsIndex = 0;
+
+    for (int i = 0; i < SDL_NUM_SCANCODES; i++)
+        engine->input[i] = KeyStateNone;
 
     InitManagers(engine);
     
@@ -102,88 +98,16 @@ void CloseEngine(Engine* engine)
     SDL_Quit();
 }
 
-void SetScale(Engine* engine)
-{
-    int realLevelWidth = engine->levelWidth * engine->zoom;
-    int realLevelHeight = engine->levelHeight * engine->zoom;
-
-    if (realLevelWidth <= engine->windowWidth)
-        engine->camera.w = realLevelWidth;
-    else
-        engine->camera.w = engine->windowWidth / engine->zoom;
-
-    if (realLevelHeight <= engine->windowHeight)
-        engine->camera.h = realLevelHeight;
-    else
-        engine->camera.h = engine->windowHeight / engine->zoom;
-
-
-    engine->renderStartPoint.x = (engine->windowWidth / 2) - (realLevelWidth / 2);
-    engine->renderStartPoint.y = (engine->windowHeight / 2) - (realLevelHeight / 2);
-    if (engine->renderStartPoint.x < 0)
-        engine->renderStartPoint.x = 0;
-    if (engine->renderStartPoint.y < 0)
-        engine->renderStartPoint.y = 0;
-}
-
 void EngineHandleEvent(Engine* engine, const SDL_Event* e)
 {
     if (e->type == SDL_WINDOWEVENT)
     {
-        switch(e->window.event)
+        if (e->window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
         {
-            case SDL_WINDOWEVENT_SIZE_CHANGED:
-                engine->windowWidth = e->window.data1;
-                engine->windowHeight = e->window.data2;
-                SetScale(engine);
-                break;
+            engine->windowWidth = e->window.data1;
+            engine->windowHeight = e->window.data2;
         }
     }
-    
-    else if (e->type == SDL_MOUSEWHEEL)
-    {
-        if(e->wheel.y > 0)
-        {
-            if (engine->zoom < 1)
-                engine->zoom *= 2;
-            else
-                engine->zoom += 1;
-            SetScale(engine);
-        }
-        else if(e->wheel.y < 0)
-        {
-            if (engine->zoom <= 1)
-                engine->zoom /= 2;
-            else
-                engine->zoom -= 1;
-            SetScale(engine);
-        }
-    }
-}
-
-void EngineUpdateCamera(Engine* engine, float x, float y, int width, int height)
-{
-    SDL_FRect* camera = &engine->camera;
-
-    camera->x = x + (width / 2) - (camera->w / 2);
-    camera->y = y + (height / 2) - (camera->h / 2);
-    if (camera->x < 0)
-        camera->x = 0;
-    else if (camera->x > engine->levelWidth - camera->w)
-        camera->x = engine->levelWidth - camera->w;
-
-    if (camera->y < 0)
-        camera->y = 0;
-    else if (camera->y > engine->levelHeight - camera->h)
-        camera->y = engine->levelHeight - camera->h;
-}
-
-void EngineGetScreenRect(Engine* engine, SDL_Rect* rect, float x, float y, int w, int h)
-{
-    rect->x = engine->renderStartPoint.x + ((x - engine->camera.x) * engine->zoom);
-    rect->y = engine->renderStartPoint.y + ((y - engine->camera.y) * engine->zoom);
-    rect->w = w * engine->zoom;
-    rect->h = h * engine->zoom;
 }
 
 void EngineUpdate(Engine* engine)
@@ -205,13 +129,13 @@ void EngineUpdate(Engine* engine)
     engine->fps /= FPSES_COUNT;
 }
 
-void RenderText(Engine* engine, const char* text, SDL_Color color, int x, int y)
+SDL_Texture* GetTextTexture(Engine* engine, const char* text, SDL_Color color, int x, int y, SDL_Rect* textureRect)
 {
     SDL_Surface* textSurface = TTF_RenderText_Solid(engine->font, text, color);
     if(textSurface == NULL)
     {
         printf( "Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError() );
-        return;
+        return NULL;
     }
 
     SDL_Texture* texture = SDL_CreateTextureFromSurface(engine->renderer, textSurface);
@@ -219,17 +143,72 @@ void RenderText(Engine* engine, const char* text, SDL_Color color, int x, int y)
     {
         printf("Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError());
     }
-    else
-    {
-        engine->textRect.x = x;
-        engine->textRect.y = y;
-        engine->textRect.w = textSurface->w;
-        engine->textRect.h = textSurface->h;
 
-        SDL_RenderCopy(engine->renderer, texture, NULL, &engine->textRect);
-    }
+    textureRect->x = x;
+    textureRect->y = y;
+    textureRect->w = textSurface->w;
+    textureRect->h = textSurface->h;
+    
+    SDL_FreeSurface(textSurface);
+    return texture;
+}
 
+void RenderText(Engine* engine, const char* text, SDL_Color color, int x, int y)
+{
+    SDL_Texture* texture = GetTextTexture(engine, text, color, x, y, &engine->textRect);
+    RenderTextFromTexture(engine, texture, &engine->textRect);
+}
+
+void RenderTextFromTexture(Engine* engine, SDL_Texture* texture, SDL_Rect* rect)
+{
+    SDL_RenderCopy(engine->renderer, texture, NULL, rect);
     if (texture != NULL)
         SDL_DestroyTexture(texture);
-    SDL_FreeSurface(textSurface);
+}
+
+bool CheckKeyFlag(int* input, SDL_Scancode key, KeyState keyFlag)
+{
+    return (input[key] & (int)keyFlag) == (int)keyFlag;
+}
+void SetKeyFlag(int* input, SDL_Scancode key, KeyState keyFlag)
+{
+    input[key] |= (int)keyFlag;
+}
+void RemoveKeyFlag(int* input, SDL_Scancode key, KeyState keyFlag)
+{
+    input[key] &= ~(int)keyFlag;
+}
+void EngineUpdateInput(Engine* engine)
+{
+    int num;
+    const Uint8* keyStates = SDL_GetKeyboardState(&num);
+
+    for (int i = 0; i < SDL_NUM_SCANCODES; i++)
+    {
+        RemoveKeyFlag(engine->input, i, KeyReleased | KeyPressed);
+
+        if (keyStates[i])
+        {
+            if (!CheckKeyFlag(engine->input, i, KeyDown))
+                SetKeyFlag(engine->input, i, KeyPressed);
+            SetKeyFlag(engine->input, i, KeyDown);
+        }
+        else if (CheckKeyFlag(engine->input, i, KeyDown))
+        {
+            engine->input[i] = KeyReleased;
+        }
+    }
+}
+
+bool IsKeyDown(int* input, SDL_Scancode key)
+{
+    return CheckKeyFlag(input, key, KeyDown);
+}
+bool IsKeyPresed(int* input, SDL_Scancode key)
+{
+    return CheckKeyFlag(input, key, KeyPressed);
+}
+bool IsKeyReleased(int* input, SDL_Scancode key)
+{
+    return CheckKeyFlag(input, key, KeyReleased);
 }

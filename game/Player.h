@@ -2,6 +2,7 @@
 #define PLAYER_H
 
 #include "engine.h"
+#include "Level.h"
 #include "Util.h"
 #include <SDL.h>
 #include <SDL_image.h>
@@ -19,7 +20,7 @@ typedef struct Player {
 void PlayerInit(Player* player, Engine* engine);
 void PlayerFree(Player* player);
 
-void PlayerHandleInput(Player* player, Engine* engine, const Uint8* keyStates);
+void PlayerHandleInput(Player* player, Engine* engine, Level* level);
 void PlayerUpdate(Player* player, Engine* engine);
 
 #endif

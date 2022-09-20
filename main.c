@@ -5,8 +5,8 @@
 #include <stdbool.h>
 
 #include "engine.h"
-#include "game/Player.h"
 #include "game/Game.h"
+#include "game/Player.h"
 #include "game/Editor.h"
 #include "game/MainMenu.h"
 
@@ -16,7 +16,7 @@ const int SCREEN_HEIGHT = 720;
 int main(int argc, char* args[])
 {
     Engine engine;
-    if (!InitEngine("GAME", SCREEN_WIDTH, SCREEN_HEIGHT, 4, &engine))
+    if (!InitEngine("GAME", SCREEN_WIDTH, SCREEN_HEIGHT, &engine))
         return false;
 
     Game game;
@@ -43,10 +43,24 @@ int main(int argc, char* args[])
             if (e.type == SDL_QUIT)
                 quit = true;
 
-            GameHandleEvent(&game, &engine, &e);
+            EngineHandleEvent(&engine, &e);
+
+            if (state == MainMenuState)
+                MainMenuHandleEvent(&mainMenu, &engine, &e);
+            else if (state == GameState)
+                GameHandleEvent(&game, &engine, &e);
+            else if (state == EditorState)
+                EditorHandleEvent(&editor, &engine, &e);
         }
-        const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
-        UpdateGame(&game, &engine, currentKeyStates);
+
+        EngineUpdateInput(&engine);
+
+        if (state == MainMenuState)
+            quit |= UpdateMainMenu(&mainMenu, &engine, &state);
+        else if (state == GameState)
+            UpdateGame(&game, &engine, &state);
+        else if (state == EditorState)
+            UpdateEditor(&editor, &engine, &state);
     }
     
     FreeGame(&game);

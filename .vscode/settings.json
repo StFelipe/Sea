@@ -17,7 +17,11 @@
         "type_traits": "c",
         "typeinfo": "c",
         "player.h": "c",
-        "mainmenu.h": "c"
+        "mainmenu.h": "c",
+        "camera.h": "c",
+        "util.h": "c",
+        "game.h": "c",
+        "sdl.h": "c"
     },
     "makefile.launchConfigurations": [
         {

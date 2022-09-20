@@ -37,25 +37,25 @@ void PlayerFree(Player* player)
 }
 
 
-void PlayerHandleInput(Player* player, Engine* engine, const Uint8* keyStates)
+void PlayerHandleInput(Player* player, Engine* engine, Level* level)
 {
     SDL_FPoint direction = { 0, 0 };
-    if(keyStates[SDL_SCANCODE_LEFT])
+    if(IsKeyDown(engine->input, SDL_SCANCODE_LEFT))
     {
         direction.x = -1;
         player->anim.dir = player->anim.left;
     }
-    else if(keyStates[SDL_SCANCODE_RIGHT])
+    else if(IsKeyDown(engine->input, SDL_SCANCODE_RIGHT))
     {
         direction.x = 1;
         player->anim.dir = player->anim.right;
     }
-    if(keyStates[SDL_SCANCODE_UP])
+    if(IsKeyDown(engine->input, SDL_SCANCODE_UP))
     {
         direction.y = -1;
         player->anim.dir = player->anim.up;
     }
-    else if(keyStates[SDL_SCANCODE_DOWN])
+    else if(IsKeyDown(engine->input, SDL_SCANCODE_DOWN))
     {
         direction.y = 1;
         player->anim.dir = player->anim.down;
@@ -76,12 +76,12 @@ void PlayerHandleInput(Player* player, Engine* engine, const Uint8* keyStates)
 
     if (player->pos.x < 0)
         player->pos.x = 0;
-    else if (player->pos.x > engine->levelWidth - player->anim.w)
-        player->pos.x = engine->levelWidth - player->anim.w;
+    else if (player->pos.x > level->w - player->anim.w)
+        player->pos.x = level->w - player->anim.w;
     if (player->pos.y < 0)
         player->pos.y = 0;
-    else if (player->pos.y > engine->levelHeight - player->anim.h)
-        player->pos.y =  engine->levelHeight - player->anim.h;
+    else if (player->pos.y > level->h - player->anim.h)
+        player->pos.y =  level->h - player->anim.h;
 }
 
 void PlayerUpdate(Player* player, Engine* engine)
