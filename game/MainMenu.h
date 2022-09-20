@@ -2,6 +2,7 @@
 #define MAIN_MENU_H
 
 #include "engine.h"
+#include "Ui.h"
 #include <stdbool.h>
 
 typedef enum MainMenuSelection {
@@ -11,9 +12,8 @@ typedef enum MainMenuSelection {
 } MainMenuSelection;
 
 typedef struct MainMenu {
-    MainMenuSelection selection;
-    SDL_Color selectedTextColor;
-    SDL_Color normalTextColor;
+    UiOption uiOption;
+    SDL_Rect drawRect;
 } MainMenu;
 
 void InitMainMenu(MainMenu* mainMenu, Engine* engine);

@@ -5,7 +5,13 @@
 #include "Player.h"
 #include "Camera.h"
 #include "Level.h"
+#include "Ui.h"
 #include <SDL.h>
+
+typedef enum PauseMenuSelection {
+    PauseMenuContinue = 0,
+    PauseMenuBack = 1,
+} PauseMenuSelection;
 
 typedef struct Game {
     Player player;
@@ -16,6 +22,8 @@ typedef struct Game {
     SDL_Rect srcRect;
     SDL_Rect destRect;
     char fps[10];
+
+    UiOption uiOption;
 } Game;
 
 void InitGame(Game* game, Engine* engine);

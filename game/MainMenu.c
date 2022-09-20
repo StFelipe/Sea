@@ -3,9 +3,9 @@
 
 void InitMainMenu(MainMenu* mainMenu, Engine* engine)
 {
-    mainMenu->selection = MainMenuPlay;
-    mainMenu->normalTextColor = (SDL_Color){ 100, 100, 100, 255 };
-    mainMenu->selectedTextColor = (SDL_Color){ 0, 0, 0, 255 };
+    mainMenu->uiOption.selection = MainMenuPlay;
+    mainMenu->uiOption.normalTextColor = NORMAL_TEXT_COLOR;
+    mainMenu->uiOption.selectedTextColor = SELECTED_TEXT_COLOR;
 }
 
 void FreeMainMenu(MainMenu* mainMenu)
@@ -31,31 +31,29 @@ bool UpdateMainMenu(MainMenu* mainMenu, Engine* engine)
 {
     if (IsKeyPresed(engine->input, SDL_SCANCODE_RETURN))
     {
-        if (mainMenu->selection == MainMenuPlay)
+        if (mainMenu->uiOption.selection == MainMenuPlay)
             engine->state = GameState;
-        if (mainMenu->selection == MainMenuEditor)
+        if (mainMenu->uiOption.selection == MainMenuEditor)
             engine->state = EditorState;
-        if (mainMenu->selection == MainMenuQuit)
+        if (mainMenu->uiOption.selection == MainMenuQuit)
             return true;
     }
 
-    if (IsKeyPresed(engine->input, SDL_SCANCODE_UP))
-    {
-        mainMenu->selection--;
-        if ((int)(mainMenu->selection) < 0)
-            mainMenu->selection = MainMenuQuit;
-    }
-    else if (IsKeyPresed(engine->input, SDL_SCANCODE_DOWN))
-    {
-        mainMenu->selection = (mainMenu->selection + 1) % (MainMenuQuit + 1);
-    }
+    UiCheckUpDown(&mainMenu->uiOption, engine, MainMenuQuit);
 
 
     SDL_RenderClear(engine->renderer);
 
-    RenderTextInMiddle(engine, "Play", (mainMenu->selection == MainMenuPlay ? mainMenu->selectedTextColor : mainMenu->normalTextColor), 0);
-    RenderTextInMiddle(engine, "Editor", (mainMenu->selection == MainMenuEditor ? mainMenu->selectedTextColor : mainMenu->normalTextColor), 50);
-    RenderTextInMiddle(engine, "Quit", (mainMenu->selection == MainMenuQuit ? mainMenu->selectedTextColor : mainMenu->normalTextColor), 100);
+    mainMenu->drawRect.x = 0;
+    mainMenu->drawRect.x = 0;
+    mainMenu->drawRect.w = engine->windowWidth;
+    mainMenu->drawRect.h = engine->windowHeight;
+    SDL_SetRenderDrawColor(engine->renderer, 30, 30, 90, 150);
+    SDL_RenderFillRect(engine->renderer, &mainMenu->drawRect);
+
+    RenderTextInMiddle(engine, "Play", GetColorOnSelection(&mainMenu->uiOption, MainMenuPlay), 0);
+    RenderTextInMiddle(engine, "Editor", GetColorOnSelection(&mainMenu->uiOption, MainMenuEditor), 50);
+    RenderTextInMiddle(engine, "Quit", GetColorOnSelection(&mainMenu->uiOption, MainMenuQuit), 100);
 
     SDL_RenderPresent(engine->renderer);
 

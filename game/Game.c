@@ -5,6 +5,10 @@ void InitGame(Game* game, Engine* engine)
     PlayerInit(&game->player, engine);
     CameraInit(&game->camera, engine);
 
+    game->uiOption.selection = PauseMenuContinue;
+    game->uiOption.normalTextColor = NORMAL_TEXT_COLOR;
+    game->uiOption.selectedTextColor = SELECTED_TEXT_COLOR;
+
     game->background = LoadTexture("assets/background.png", engine->renderer);
     SDL_QueryTexture(game->background, NULL, NULL, &game->level.w, &game->level.h);
 }
@@ -66,6 +70,20 @@ void UpdateGame(Game* game, Engine* engine)
 
     if (engine->isPaused)
     {
+        if (IsKeyPresed(engine->input, SDL_SCANCODE_RETURN))
+        {
+            if (game->uiOption.selection == PauseMenuContinue)
+                engine->isPaused = false;
+                
+            if (game->uiOption.selection == PauseMenuBack)
+            {
+                engine->isPaused = false;
+                engine->state = MainMenuState;
+            }
+        }
+
+        UiCheckUpDown(&game->uiOption, engine, PauseMenuBack);
+
         game->destRect.x = 0;
         game->destRect.y = 0;
         game->destRect.w = engine->windowWidth;
@@ -76,7 +94,10 @@ void UpdateGame(Game* game, Engine* engine)
         SDL_RenderFillRect(engine->renderer, &game->destRect);
         SDL_SetRenderDrawBlendMode(engine->renderer, SDL_BLENDMODE_NONE);
 
-        RenderText(engine, "Testing", (SDL_Color){ 255, 255, 100, 255}, 250, 250);
+        int x = 100;
+        int y = (engine->windowHeight / 4);
+        RenderText(engine, "Continue", GetColorOnSelection(&game->uiOption, PauseMenuContinue), x, y);
+        RenderText(engine, "Main Menu", GetColorOnSelection(&game->uiOption, PauseMenuBack), x, y + 50);
     }
 
     SDL_RenderPresent(engine->renderer);

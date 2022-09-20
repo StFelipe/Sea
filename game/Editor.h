@@ -3,8 +3,13 @@
 
 #include "engine.h"
 
-typedef struct Editor {
+typedef enum EditorSelection {
+    EditorSave = 0,
+    EditorLoad = 1,
+    EditorBack = 2
+} EditorSelection;
 
+typedef struct Editor {
 } Editor;
 
 void InitEditor(Editor* editor, Engine* engine);
